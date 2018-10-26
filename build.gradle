@@ -6,14 +6,13 @@ buildscript {
     dependencies {
         classpath group: 'com.netflix.nebula', name: 'nebula-dependency-recommender', version: '4.2.0'
         classpath group: 'org.starchartlabs.flare', name: 'flare-operations-plugins', version: '0.2.0'
+        classpath group: 'org.starchartlabs.flare', name: 'flare-publishing-plugins', version: '0.2.0'
     }
 }
 
 plugins {
     id 'org.sonarqube' version '2.5'
 }
-
-apply plugin: 'org.starchartlabs.flare.merge-coverage-reports'
 
 if (project.hasProperty('sonarLogin')) {
     System.setProperty('sonar.login', "${sonarLogin}")
@@ -66,24 +65,8 @@ allprojects{
 subprojects{
     apply plugin: 'maven'
     apply plugin: 'org.starchartlabs.flare.increase-test-logging'
-
-    //All projects should provide source code and javadoc, and upload these with any released artifacts
-    //TODO plug-in
-    task sourcesJar(type: Jar, dependsOn: classes) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
-        from javadoc.destinationDir
-    }
-
-    artifacts {
-        archives sourcesJar
-        archives javadocJar
-    }
-
+    apply plugin: 'org.starchartlabs.flare.source-jars'
+    
     //Setup default test behavior, including failure logging
     test {
         useTestNG() {
@@ -91,14 +74,34 @@ subprojects{
         }
     }
 
-    artifacts {
-        archives sourcesJar
-        archives javadocJar
+    //Apply module naming to all projects
+    //Add LICENSE so it is included in all JARs, as well as dependent licenses, fulfilling the "distributions include license" requirement
+    jar {
+        manifest {
+            attributes("Automatic-Module-Name": "${project.group}.${project.name  - 'calamari-'}".replaceAll("-", "."))
+        }
+        
+        from("${rootDir}"){
+            include 'LICENSE'
+        }
+    }
+    
+    //All projects should provide source code and javadoc, and upload these with any released artifacts
+    sourcesJar {
+        from("${rootDir}"){
+            include 'LICENSE'
+        }
+    }
+
+    javadocJar{
+        from("${rootDir}"){
+            include 'LICENSE'
+        }
     }
 
     sonarqube {
         properties {
-            property 'sonar.projectKey', "${project.group}:calamari:${project.name}"
+            property 'sonar.projectKey', "${project.group}:${project.name}"
             property 'sonar.junit.reportsPath', file("${buildDir}/test-results/test")
             property 'sonar.core.codeCoveragePlugin', 'jacoco'
             property 'sonar.jacoco.reportPaths', "${buildDir}/jacoco/test.exec"
