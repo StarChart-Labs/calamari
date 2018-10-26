@@ -1,0 +1,106 @@
+buildscript {
+    repositories {
+        maven { url 'https://plugins.gradle.org/m2/' }
+        jcenter()
+    }
+    dependencies {
+        classpath group: 'com.netflix.nebula', name: 'nebula-dependency-recommender', version: '4.2.0'
+        classpath group: 'org.starchartlabs.flare', name: 'flare-operations-plugins', version: '0.2.0'
+    }
+}
+
+plugins {
+    id 'org.sonarqube' version '2.5'
+}
+
+apply plugin: 'org.starchartlabs.flare.merge-coverage-reports'
+
+if (project.hasProperty('sonarLogin')) {
+    System.setProperty('sonar.login', "${sonarLogin}")
+}
+
+sonarqube {
+    properties {
+        property 'sonar.projectName', 'Calamari'
+        property 'sonar.projectKey', 'org.starchartlabs.calamari:calamari'
+        property 'sonar.organization', 'starchart-labs'
+        property 'sonar.junit.reportsPath', file("${buildDir}/test-results/test")
+        property 'sonar.core.codeCoveragePlugin', 'jacoco'
+        property 'sonar.jacoco.reportPaths', "${buildDir}/jacoco/test.exec"
+        property 'sonar.host.url', 'https://sonarcloud.io'
+    }
+}
+
+allprojects{
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    apply plugin: 'jacoco'
+    apply plugin: 'nebula.dependency-recommender'
+    apply plugin: 'org.starchartlabs.flare.dependency-insight'
+
+    dependencyRecommendations {
+        propertiesFile file: file("${rootDir}/dependencies.properties")
+    }
+
+    group = 'org.starchartlabs.calamari'
+
+    sourceCompatibility = "${javaVersion}"
+
+    //Always download sources, to allow debugging, and use Eclipse containers for greater portability
+    eclipse {
+        classpath {
+            downloadSources=true
+            containers = [ "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-${sourceCompatibility}".toString() ]
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://maven.repository.redhat.com/ga/' }
+    }
+
+}
+
+subprojects{
+    apply plugin: 'maven'
+    apply plugin: 'org.starchartlabs.flare.increase-test-logging'
+
+    //All projects should provide source code and javadoc, and upload these with any released artifacts
+    //TODO plug-in
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+
+    //Setup default test behavior, including failure logging
+    test {
+        useTestNG() {
+            useDefaultListeners = true
+        }
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+
+    sonarqube {
+        properties {
+            property 'sonar.projectKey', "${project.group}:calamari:${project.name}"
+            property 'sonar.junit.reportsPath', file("${buildDir}/test-results/test")
+            property 'sonar.core.codeCoveragePlugin', 'jacoco'
+            property 'sonar.jacoco.reportPaths', "${buildDir}/jacoco/test.exec"
+            properties['sonar.sources'] = sourceSets.main.java.srcDirs.findAll { it.exists() && !it.path.contains('resources') } ?: []
+        }
+    }
+}
