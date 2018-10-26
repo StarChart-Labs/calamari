@@ -5,7 +5,7 @@ We welcome any contributions! If you wish to contribute:
 - Fork the `calamari` repository
 - Clone your fork to your development machine
 - Run `./gradlew clean build` to confirm you are starting from a working setup
- - Please report any issues with this build step in the GitHub project's issues
+  - Please report any issues with this build step in the project's [issues](https://github.com/StarChart-Labs/calamari/issues)
 - Create a branch for your work
 - Setup your development environment (see below)
 - Make changes
