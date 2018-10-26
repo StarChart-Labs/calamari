@@ -31,6 +31,8 @@ sonarqube {
     }
 }
 
+apply plugin: 'org.starchartlabs.flare.merge-coverage-reports'
+
 allprojects{
     apply plugin: 'java'
     apply plugin: 'eclipse'
