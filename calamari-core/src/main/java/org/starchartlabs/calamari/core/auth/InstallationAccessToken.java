@@ -14,7 +14,9 @@ import java.util.function.Supplier;
 import org.starchartlabs.alloy.core.Strings;
 import org.starchartlabs.alloy.core.Suppliers;
 import org.starchartlabs.calamari.core.MediaTypes;
+import org.starchartlabs.calamari.core.ResponseConditions;
 import org.starchartlabs.calamari.core.exception.KeyLoadingException;
+import org.starchartlabs.calamari.core.exception.RequestLimitExceededException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -96,8 +98,10 @@ public class InstallationAccessToken implements Supplier<String> {
      * Generates a new access token from the application key reference and a known installation instance
      *
      * @return Generated access token valid for up to sixty minutes after this function is called
+     * @throws RequestLimitExceededException
+     *             If the request exceeded the maximum allowed requests to GitHub in a given time period
      * @throws KeyLoadingException
-     *             If the is an error making the GitHub web request to obtain the access token
+     *             If there is an error making the GitHub web request to obtain the access token
      */
     private String generateNewToken() {
         HttpUrl url = HttpUrl.parse(installationAccessTokenUrl);
@@ -111,12 +115,12 @@ public class InstallationAccessToken implements Supplier<String> {
                 .url(url)
                 .build();
 
-        try {
-            Response response = httpClient.newCall(request).execute();
-
+        try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 return AccessTokenResponse.fromJson(response.body().string()).getToken();
             } else {
+                ResponseConditions.checkRateLimit(response);
+
                 throw new KeyLoadingException(
                         Strings.format("Request exchanging application key for installation token failed (%s - %s)",
                                 response.code(), response.message()));
@@ -142,6 +146,8 @@ public class InstallationAccessToken implements Supplier<String> {
      *            <a href="https://developer.github.com/v3/#user-agent-required">required by GitHub</a>
      * @return A reference to a renewable access token for authentication as a specific installation in web requests to
      *         GitHub
+     * @throws RequestLimitExceededException
+     *             If the request exceeded the maximum allowed requests to GitHub in a given time period
      * @since 0.1.0
      */
     public static InstallationAccessToken forRepository(String repositoryUrl, ApplicationKey applicationKey,
@@ -163,16 +169,17 @@ public class InstallationAccessToken implements Supplier<String> {
                 .url(url)
                 .build();
 
-        try {
-            Response response = httpClient.newCall(request).execute();
-
+        try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 String installationAccessTokenUrl = InstallationResponse.fromJson(response.body().string())
                         .getAccessTokensUrl();
 
                 return new InstallationAccessToken(installationAccessTokenUrl, applicationKey, userAgent);
             } else {
-                throw new RuntimeException("Request unsuccessful (" + response.code() + ")");
+                ResponseConditions.checkRateLimit(response);
+
+                throw new RuntimeException(
+                        "Request unsuccessful (" + response.code() + " - " + response.message() + ")");
             }
         } catch (IOException e) {
             throw new KeyLoadingException("Error requesting or deserializing GitHub installation response", e);
