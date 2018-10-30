@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.starchartlabs.calamari.core.auth.ApplicationKey;
 import org.starchartlabs.calamari.core.auth.InstallationAccessToken;
 import org.starchartlabs.calamari.core.exception.KeyLoadingException;
+import org.starchartlabs.calamari.core.exception.RequestLimitExceededException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -31,6 +32,8 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
 public class InstallationAccessTokenTest {
+
+    private static final String RATE_LIMIT_REMAINING_HEADER = "X-RateLimit-Remaining";
 
     private static final Path TEST_RESOURCE_FOLDER = Paths.get("org", "starchartlabs", "calamari", "test", "core",
             "auth");
@@ -88,6 +91,34 @@ public class InstallationAccessTokenTest {
     public void getUnsuccessfulRequest() throws Exception {
         try (MockWebServer server = new MockWebServer()) {
             server.enqueue(new MockResponse().setResponseCode(404));
+            server.start();
+
+            String installationAccessTokenUrl = server.url("/install").toString();
+
+            InstallationAccessToken token = new InstallationAccessToken(installationAccessTokenUrl, applicationKey,
+                    "userAgent");
+
+            try {
+                token.get();
+            } finally {
+                Assert.assertEquals(server.getRequestCount(), 1);
+                RecordedRequest request = server.takeRequest(1, TimeUnit.SECONDS);
+
+                Assert.assertNotNull(request.getHeader("Authorization"));
+                Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
+                Assert.assertEquals(request.getPath(), "/install");
+            }
+        }
+    }
+
+    @Test(expectedExceptions = RequestLimitExceededException.class)
+    public void getRequestLimitExceeded() throws Exception {
+        MockResponse response = new MockResponse()
+                .setResponseCode(403)
+                .addHeader(RATE_LIMIT_REMAINING_HEADER, "0");
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(response);
             server.start();
 
             String installationAccessTokenUrl = server.url("/install").toString();
@@ -173,6 +204,22 @@ public class InstallationAccessTokenTest {
                 Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
                 Assert.assertEquals(request.getPath(), "/install");
             }
+        }
+    }
+
+    @Test(expectedExceptions = RequestLimitExceededException.class)
+    public void forRepositoryRequestLimitExceeded() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            String repoUrl = server.url("/repo").toString();
+
+            MockResponse respositoryResponse = new MockResponse()
+                    .setResponseCode(403)
+                    .addHeader(RATE_LIMIT_REMAINING_HEADER, "0");
+
+            server.enqueue(respositoryResponse);
+
+            InstallationAccessToken.forRepository(repoUrl, applicationKey, "userAgent");
         }
     }
 
