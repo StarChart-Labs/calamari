@@ -44,7 +44,7 @@ public class ResponseConditions {
      *            OkHttp3 representation of a web response
      * @since 0.1.0
      */
-    public static <T> void checkRateLimit(Response response) throws RequestLimitExceededException {
+    public static void checkRateLimit(Response response) throws RequestLimitExceededException {
         Objects.requireNonNull(response);
 
         checkRateLimit(response, Response::code, (res, header) -> res.headers().values(header));
@@ -63,6 +63,8 @@ public class ResponseConditions {
      * @param headerLookup
      *            Function which takes a response and header value as input, and produces all instances of that header
      *            from the response
+     * @param <T>
+     *            Java type representing a web response
      * @throws RequestLimitExceededException
      *             If the provided response represents exceeding GitHub's rate limiting
      * @since 0.1.0
