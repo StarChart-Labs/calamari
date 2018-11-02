@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.1.0]
 ### Added
 - Add org.starchartlabs.calamari.core.MediaTypes as a centralized definition of common media types used with interacting with GitHub
 - Add org.starchartlabs.calamari.core.auth.ApplicationKey for streamlined handling of authenticating with GitHub via private key as the App itself
