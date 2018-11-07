@@ -22,4 +22,6 @@ If you discover a security vulnerability, contact the development team by e-mail
 
 ### calamari-core
 
+[![Maven Central](https://img.shields.io/maven-central/v/org.starchartlabs.calamari/calamari-core.svg)](https://mvnrepository.com/artifact/org.starchartlabs.calamari/calamari-core)
+
 Contains utilities for operations expected to be necessary for the vast majority of GitHub App implementations, such as authentication
