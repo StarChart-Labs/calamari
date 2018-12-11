@@ -154,6 +154,39 @@ public class InstallationAccessToken implements Supplier<String> {
             String userAgent) {
         Objects.requireNonNull(applicationKey);
         Objects.requireNonNull(repositoryUrl);
+        Objects.requireNonNull(userAgent);
+
+        String installationAccessTokenUrl = getInstallationUrl(repositoryUrl, applicationKey, userAgent);
+
+        return new InstallationAccessToken(installationAccessTokenUrl, applicationKey, userAgent);
+    }
+
+    // TODO romeara
+    /**
+     * Looks up the location of the resource describing the installation for a given repository
+     *
+     * <p>
+     * Uses the provided {@code applicationKey} to read required installation details from GitHub specific to the
+     * repository represented at the provided URL. It is recommended that clients use
+     * {@link #forRepository(String, ApplicationKey, String)} when possible - this call is primarily meant for cases
+     * where the URL can be used with caching mechanisms to reduce the total number of calls to GitHub
+     *
+     * @param repositoryUrl
+     *            The API URL which represents the target repository on GitHub
+     * @param applicationKey
+     *            Application key which allows authentication as a GitHub App in web requests
+     * @param userAgent
+     *            User agent to make repository requests with, as
+     *            <a href="https://developer.github.com/v3/#user-agent-required">required by GitHub</a>
+     * @return A reference to a resource describing the installation on the repository
+     * @throws RequestLimitExceededException
+     *             If the request exceeded the maximum allowed requests to GitHub in a given time period
+     * @since 0.1.2
+     */
+    public static String getInstallationUrl(String repositoryUrl, ApplicationKey applicationKey, String userAgent) {
+        Objects.requireNonNull(applicationKey);
+        Objects.requireNonNull(repositoryUrl);
+        Objects.requireNonNull(userAgent);
 
         OkHttpClient httpClient = new OkHttpClient();
 
@@ -171,10 +204,7 @@ public class InstallationAccessToken implements Supplier<String> {
 
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful()) {
-                String installationAccessTokenUrl = InstallationResponse.fromJson(response.body().string())
-                        .getAccessTokensUrl();
-
-                return new InstallationAccessToken(installationAccessTokenUrl, applicationKey, userAgent);
+                return InstallationResponse.fromJson(response.body().string()).getAccessTokensUrl();
             } else {
                 ResponseConditions.checkRateLimit(response);
 

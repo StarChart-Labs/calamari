@@ -87,6 +87,21 @@ public class InstallationAccessTokenTest {
         InstallationAccessToken.forRepository("http://repo", applicationKey, null);
     }
 
+    @Test(expectedExceptions = NullPointerException.class)
+    public void getInstallationUrlNullRepositoryUrl() throws Exception {
+        InstallationAccessToken.getInstallationUrl(null, applicationKey, "userAgent");
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void getInstallationUrlNullApplicationKey() throws Exception {
+        InstallationAccessToken.getInstallationUrl("http://repo", null, "userAgent");
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void getInstallationUrlNullUserAgent() throws Exception {
+        InstallationAccessToken.getInstallationUrl("http://repo", applicationKey, null);
+    }
+
     @Test(expectedExceptions = KeyLoadingException.class)
     public void getUnsuccessfulRequest() throws Exception {
         try (MockWebServer server = new MockWebServer()) {
@@ -263,6 +278,51 @@ public class InstallationAccessTokenTest {
                 Assert.assertNotNull(request.getHeader("Authorization"));
                 Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
                 Assert.assertEquals(request.getPath(), "/install");
+            }
+        }
+    }
+
+    @Test(expectedExceptions = RequestLimitExceededException.class)
+    public void getInstallationTokenUrlRequestLimitExceeded() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            String repoUrl = server.url("/repo").toString();
+
+            MockResponse respositoryResponse = new MockResponse()
+                    .setResponseCode(403)
+                    .addHeader(RATE_LIMIT_REMAINING_HEADER, "0");
+
+            server.enqueue(respositoryResponse);
+
+            InstallationAccessToken.getInstallationUrl(repoUrl, applicationKey, "userAgent");
+        }
+    }
+
+    @Test
+    public void getInstallationTokenUrl() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            String repoUrl = server.url("/repo").toString();
+            String installationAccessTokenUrl = server.url("/install").toString();
+
+            MockResponse respositoryResponse = new MockResponse()
+                    .addHeader("Content-Type", "application/json")
+                    .setBody(getRepositoryResponse(installationAccessTokenUrl));
+
+            server.enqueue(respositoryResponse);
+
+            try {
+                String result = InstallationAccessToken.getInstallationUrl(repoUrl, applicationKey, "userAgent");
+
+                Assert.assertNotNull(result);
+                Assert.assertEquals(result, installationAccessTokenUrl);
+            } finally {
+                Assert.assertEquals(server.getRequestCount(), 1);
+                RecordedRequest request = server.takeRequest(1, TimeUnit.SECONDS);
+
+                Assert.assertNotNull(request.getHeader("Authorization"));
+                Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
+                Assert.assertEquals(request.getPath(), "/repo/installation");
             }
         }
     }
