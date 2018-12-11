@@ -161,7 +161,6 @@ public class InstallationAccessToken implements Supplier<String> {
         return new InstallationAccessToken(installationAccessTokenUrl, applicationKey, userAgent);
     }
 
-    // TODO romeara
     /**
      * Looks up the location of the resource describing the installation for a given repository
      *
