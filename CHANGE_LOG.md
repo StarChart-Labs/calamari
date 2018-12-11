@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+- Add InstallationAccessToken.getInstallationUrl to allow more complex client caching behavior
 
 ## [0.1.1]
 - Add description to deployment of calamari-core project
