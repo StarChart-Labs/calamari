@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.2.0]
 - Add InstallationAccessToken.getInstallationUrl to allow more complex client caching behavior
 
 ## [0.1.1]
