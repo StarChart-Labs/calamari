@@ -27,6 +27,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 /**
  * Represents an access token used to validate web requests to GitHub as a
@@ -106,9 +107,9 @@ public class InstallationAccessToken implements Supplier<String> {
     private String generateNewToken() {
         HttpUrl url = HttpUrl.parse(installationAccessTokenUrl);
 
-        RequestBody body = RequestBody.create(null, new byte[] {});
+        RequestBody requestBody = RequestBody.create(null, new byte[] {});
         Request request = new Request.Builder()
-                .post(body)
+                .post(requestBody)
                 .header("Authorization", applicationKey.get())
                 .header("Accept", MediaTypes.APP_PREVIEW)
                 .header("User-Agent", userAgent)
@@ -117,7 +118,9 @@ public class InstallationAccessToken implements Supplier<String> {
 
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful()) {
-                return AccessTokenResponse.fromJson(response.body().string()).getToken();
+                try (ResponseBody body = response.body()) {
+                    return AccessTokenResponse.fromJson(body.string()).getToken();
+                }
             } else {
                 ResponseConditions.checkRateLimit(response);
 
