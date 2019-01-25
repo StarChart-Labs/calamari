@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.2.1]
 ### Fixed
 - Updated InstallationAccessToken.generateNewToken to close OkHttp response body
 
