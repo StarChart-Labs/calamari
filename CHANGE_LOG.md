@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Added org.starchartlabs.calamari.core.content.ConfigurationFileLoader for reading configuration file contents from GitHub
 
 ## [0.2.1]
 ### Fixed
