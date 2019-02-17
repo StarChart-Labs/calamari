@@ -11,6 +11,7 @@ dependencies {
     compile 'org.starchartlabs.alloy:alloy-core'
     
     testCompile 'com.squareup.okhttp3:mockwebserver'
+    testCompile 'org.mockito:mockito-core'
     testCompile 'org.testng:testng'
     
     testRuntime 'org.slf4j:slf4j-simple'
