@@ -58,6 +58,8 @@ public class InstallationAccessToken implements Supplier<String> {
 
     private final String userAgent;
 
+    private final String mediaType;
+
     private final OkHttpClient httpClient;
 
     private final Supplier<String> headerSupplier;
@@ -72,11 +74,28 @@ public class InstallationAccessToken implements Supplier<String> {
      *            <a href="https://developer.github.com/v3/#user-agent-required">required by GitHub</a>
      * @since 0.1.0
      */
+    public InstallationAccessToken(String installationAccessTokenUrl, ApplicationKey applicationKey, String userAgent) {
+        this(installationAccessTokenUrl, applicationKey, userAgent, MediaTypes.APP_PREVIEW);
+    }
+
+    /**
+     * @param installationAccessTokenUrl
+     *            URL which represents access token resources for a specific GitHub App installation
+     * @param applicationKey
+     *            Key used to access GitHub web resources as a GitHub App outside an installation context
+     * @param userAgent
+     *            The user agent to make web requests as, as
+     *            <a href="https://developer.github.com/v3/#user-agent-required">required by GitHub</a>
+     * @param mediaType
+     *            The media type to request from the server via {@code Accept} header
+     * @since 0.2.0
+     */
     public InstallationAccessToken(String installationAccessTokenUrl, ApplicationKey applicationKey,
-            String userAgent) {
+            String userAgent, String mediaType) {
         this.applicationKey = Objects.requireNonNull(applicationKey);
         this.installationAccessTokenUrl = Objects.requireNonNull(installationAccessTokenUrl);
         this.userAgent = Objects.requireNonNull(userAgent);
+        this.mediaType = Objects.requireNonNull(mediaType);
 
         httpClient = new OkHttpClient();
         headerSupplier = Suppliers.map(
@@ -111,7 +130,7 @@ public class InstallationAccessToken implements Supplier<String> {
         Request request = new Request.Builder()
                 .post(requestBody)
                 .header("Authorization", applicationKey.get())
-                .header("Accept", MediaTypes.APP_PREVIEW)
+                .header("Accept", mediaType)
                 .header("User-Agent", userAgent)
                 .url(url)
                 .build();
@@ -155,13 +174,41 @@ public class InstallationAccessToken implements Supplier<String> {
      */
     public static InstallationAccessToken forRepository(String repositoryUrl, ApplicationKey applicationKey,
             String userAgent) {
+        return forRepository(repositoryUrl, applicationKey, userAgent, MediaTypes.APP_PREVIEW);
+    }
+
+    /**
+     * Creates an installation access token for the installation on a given repository.
+     *
+     * <p>
+     * Uses the provided {@code applicationKey} to read required installation details from GitHub specific to the
+     * repository represented at the provided URL
+     *
+     * @param repositoryUrl
+     *            The API URL which represents the target repository on GitHub
+     * @param applicationKey
+     *            Application key which allows authentication as a GitHub App in web requests
+     * @param userAgent
+     *            User agent to make repository requests with, as
+     *            <a href="https://developer.github.com/v3/#user-agent-required">required by GitHub</a>
+     * @param mediaType
+     *            The media type to request from the server via {@code Accept} header
+     * @return A reference to a renewable access token for authentication as a specific installation in web requests to
+     *         GitHub
+     * @throws RequestLimitExceededException
+     *             If the request exceeded the maximum allowed requests to GitHub in a given time period
+     * @since 0.1.0
+     */
+    public static InstallationAccessToken forRepository(String repositoryUrl, ApplicationKey applicationKey,
+            String userAgent, String mediaType) {
         Objects.requireNonNull(applicationKey);
         Objects.requireNonNull(repositoryUrl);
         Objects.requireNonNull(userAgent);
+        Objects.requireNonNull(mediaType);
 
         String installationAccessTokenUrl = getInstallationUrl(repositoryUrl, applicationKey, userAgent);
 
-        return new InstallationAccessToken(installationAccessTokenUrl, applicationKey, userAgent);
+        return new InstallationAccessToken(installationAccessTokenUrl, applicationKey, userAgent, mediaType);
     }
 
     /**
