@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.3.0]
 ### Added
 - Added org.starchartlabs.calamari.core.content.FileContentReader for reading configuration file contents from GitHub
 - Added ability to override media type used in InstallationAccessToken requests
