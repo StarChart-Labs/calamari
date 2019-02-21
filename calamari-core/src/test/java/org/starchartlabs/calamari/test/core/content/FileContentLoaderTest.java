@@ -25,7 +25,7 @@ import org.mockito.MockitoAnnotations;
 import org.starchartlabs.calamari.core.MediaTypes;
 import org.starchartlabs.calamari.core.auth.InstallationAccessToken;
 import org.starchartlabs.calamari.core.content.FileContentLoader;
-import org.starchartlabs.calamari.core.exception.FileContentException;
+import org.starchartlabs.calamari.core.exception.GitHubResponseException;
 import org.starchartlabs.calamari.core.exception.RequestLimitExceededException;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -96,7 +96,7 @@ public class FileContentLoaderTest {
     }
 
 
-    @Test(expectedExceptions = FileContentException.class)
+    @Test(expectedExceptions = GitHubResponseException.class)
     public void loadContentsErrorResponse() throws Exception {
         MockResponse response = new MockResponse()
                 .setResponseCode(412);

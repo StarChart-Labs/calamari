@@ -20,6 +20,7 @@ import org.starchartlabs.calamari.core.MediaTypes;
 import org.starchartlabs.calamari.core.ResponseConditions;
 import org.starchartlabs.calamari.core.auth.InstallationAccessToken;
 import org.starchartlabs.calamari.core.exception.FileContentException;
+import org.starchartlabs.calamari.core.exception.GitHubResponseException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -116,7 +117,7 @@ public class FileContentLoader {
             } else if (response.code() != 404) {
                 ResponseConditions.checkRateLimit(response);
 
-                throw new FileContentException(
+                throw new GitHubResponseException(
                         "Request unsuccessful (" + response.code() + " - " + response.message() + ")");
             }
 
