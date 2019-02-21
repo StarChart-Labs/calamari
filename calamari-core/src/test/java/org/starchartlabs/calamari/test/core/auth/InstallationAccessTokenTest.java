@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.starchartlabs.calamari.core.MediaTypes;
 import org.starchartlabs.calamari.core.auth.ApplicationKey;
 import org.starchartlabs.calamari.core.auth.InstallationAccessToken;
 import org.starchartlabs.calamari.core.exception.KeyLoadingException;
@@ -73,6 +74,11 @@ public class InstallationAccessTokenTest {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
+    public void contructNullMediaType() throws Exception {
+        new InstallationAccessToken("http://url", applicationKey, "userAgent", null);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
     public void forRepositoryNullRepositoryUrl() throws Exception {
         InstallationAccessToken.forRepository(null, applicationKey, "userAgent");
     }
@@ -85,6 +91,11 @@ public class InstallationAccessTokenTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void forRepositoryNullUserAgent() throws Exception {
         InstallationAccessToken.forRepository("http://repo", applicationKey, null);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void forRepositoryNullMediaType() throws Exception {
+        InstallationAccessToken.forRepository("http://repo", applicationKey, "userAgent", null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -180,6 +191,7 @@ public class InstallationAccessTokenTest {
 
                 Assert.assertNotNull(request.getHeader("Authorization"));
                 Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
+                Assert.assertEquals(request.getHeader("Accept"), MediaTypes.APP_PREVIEW);
                 Assert.assertEquals(request.getPath(), "/install");
             }
         }
@@ -217,6 +229,39 @@ public class InstallationAccessTokenTest {
 
                 Assert.assertNotNull(request.getHeader("Authorization"));
                 Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
+                Assert.assertEquals(request.getHeader("Accept"), MediaTypes.APP_PREVIEW);
+                Assert.assertEquals(request.getPath(), "/install");
+            }
+        }
+    }
+
+    @Test
+    public void getCustomMediaType() throws Exception {
+        MockResponse response = new MockResponse()
+                .addHeader("Content-Type", "application/json")
+                .setBody(accessTokenResponse);
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(response);
+            server.start();
+
+            String installationAccessTokenUrl = server.url("/install").toString();
+
+            InstallationAccessToken token = new InstallationAccessToken(installationAccessTokenUrl, applicationKey,
+                    "userAgent", "mediaType");
+
+            try {
+                String result = token.get();
+
+                Assert.assertNotNull(result);
+                Assert.assertEquals(result, "token " + accessToken);
+            } finally {
+                Assert.assertEquals(server.getRequestCount(), 1);
+                RecordedRequest request = server.takeRequest(1, TimeUnit.SECONDS);
+
+                Assert.assertNotNull(request.getHeader("Authorization"));
+                Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
+                Assert.assertEquals(request.getHeader("Accept"), "mediaType");
                 Assert.assertEquals(request.getPath(), "/install");
             }
         }

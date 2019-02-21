@@ -66,6 +66,16 @@ public class FileContentLoaderTest {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
+    public void contructNullUserAgentWithMediaType() throws Exception {
+        new FileContentLoader(null, "mediaType");
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void constructNullMediaType() throws Exception {
+        new FileContentLoader("userAgent", null);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
     public void loadContentsNullAccessToken() throws Exception {
         fileContentLoader.loadContents(null, "repositoryUrl", "ref", "path.json");
     }
@@ -344,6 +354,57 @@ public class FileContentLoaderTest {
 
                 Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
                 Assert.assertEquals(request.getHeader("Accept"), MediaTypes.APP_PREVIEW);
+                Assert.assertEquals(request.getHeader("Authorization"), "token authToken12345");
+                Assert.assertEquals(request.getPath(),
+                        "/api/repos/" + owner + "/" + repository + "/contents/" + path + "?ref=" + ref);
+
+                Mockito.verify(accessToken).get();
+            }
+        }
+    }
+
+    @Test
+    public void loadContentsCustomMediaType() throws Exception {
+        String responseJson = null;
+
+        try (BufferedReader reader = getClasspathReader(TEST_RESOURCE_FOLDER.resolve("fileContentResponse.json"))) {
+            responseJson = reader.lines()
+                    .collect(Collectors.joining("\n"));
+        }
+
+        String mediaType = "customMediaType";
+
+        MockResponse response = new MockResponse()
+                .addHeader("Content-Type", mediaType)
+                .setBody(responseJson);
+
+        String owner = "owner";
+        String repository = "repository";
+        String ref = "ref";
+        String path = "path.json";
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(response);
+            server.start();
+
+            String repositoryUrl = server.url("/api/repos/" + owner + "/" + repository).toString();
+
+            FileContentLoader contentLoader = new FileContentLoader("userAgent", mediaType);
+
+            Mockito.when(accessToken.get()).thenReturn("token authToken12345");
+
+            try {
+                Optional<String> result = contentLoader.loadContents(accessToken, repositoryUrl, ref, path);
+
+                Assert.assertNotNull(result);
+                Assert.assertTrue(result.isPresent());
+                Assert.assertEquals(result.get(), "This is test text");
+            } finally {
+                Assert.assertEquals(server.getRequestCount(), 1);
+                RecordedRequest request = server.takeRequest(1, TimeUnit.SECONDS);
+
+                Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
+                Assert.assertEquals(request.getHeader("Accept"), mediaType);
                 Assert.assertEquals(request.getHeader("Authorization"), "token authToken12345");
                 Assert.assertEquals(request.getPath(),
                         "/api/repos/" + owner + "/" + repository + "/contents/" + path + "?ref=" + ref);

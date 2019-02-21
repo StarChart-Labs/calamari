@@ -51,6 +51,8 @@ public class FileContentLoader {
 
     private final String userAgent;
 
+    private final String mediaType;
+
     /**
      * @param userAgent
      *            The user agent to make web requests as, as
@@ -58,7 +60,20 @@ public class FileContentLoader {
      * @since 0.3.0
      */
     public FileContentLoader(String userAgent) {
+        this(userAgent, MediaTypes.APP_PREVIEW);
+    }
+
+    /**
+     * @param userAgent
+     *            The user agent to make web requests as, as
+     *            <a href="https://developer.github.com/v3/#user-agent-required">required by GitHub</a>
+     * @param mediaType
+     *            The media type to request from the server via {@code Accept} header
+     * @since 0.3.0
+     */
+    public FileContentLoader(String userAgent, String mediaType) {
         this.userAgent = Objects.requireNonNull(userAgent);
+        this.mediaType = Objects.requireNonNull(mediaType);
 
         httpClient = new OkHttpClient();
     }
@@ -135,7 +150,7 @@ public class FileContentLoader {
         return new Request.Builder()
                 .get()
                 .header("Authorization", installationToken.get())
-                .header("Accept", MediaTypes.APP_PREVIEW)
+                .header("Accept", mediaType)
                 .header("User-Agent", userAgent)
                 .url(url)
                 .build();

@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- Added org.starchartlabs.calamari.core.content.ConfigurationFileLoader for reading configuration file contents from GitHub
+- Added org.starchartlabs.calamari.core.content.FileContentReader for reading configuration file contents from GitHub
+- Added ability to override media type used in InstallationAccessToken requests
 - Added org.starchartlabs.calamari.core.paging.PagingLinks to represent GitHub paging links
 - Added org.starchartlabs.calamari.core.paging.GitHubPageIterator<T> to allow traversal of GitHub paged data
 
