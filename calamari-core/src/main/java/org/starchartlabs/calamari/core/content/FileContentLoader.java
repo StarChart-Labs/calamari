@@ -20,6 +20,7 @@ import org.starchartlabs.calamari.core.MediaTypes;
 import org.starchartlabs.calamari.core.ResponseConditions;
 import org.starchartlabs.calamari.core.auth.InstallationAccessToken;
 import org.starchartlabs.calamari.core.exception.FileContentException;
+import org.starchartlabs.calamari.core.exception.GitHubResponseException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -38,6 +39,9 @@ import okhttp3.ResponseBody;
  * <p>
  * It is intended for an application to create a single loader instance for a configuration file, and utilize
  * {@link #loadContents(InstallationAccessToken, String, String, String)} for each individual repository lookup desired
+ *
+ * <p>
+ * If used by a GitHub App, access to the GitHub APIs used requires "contents:read" or "single file:read" permission(s)
  *
  * @author romeara
  * @since 0.3.0
@@ -113,7 +117,7 @@ public class FileContentLoader {
             } else if (response.code() != 404) {
                 ResponseConditions.checkRateLimit(response);
 
-                throw new FileContentException(
+                throw new GitHubResponseException(
                         "Request unsuccessful (" + response.code() + " - " + response.message() + ")");
             }
 
