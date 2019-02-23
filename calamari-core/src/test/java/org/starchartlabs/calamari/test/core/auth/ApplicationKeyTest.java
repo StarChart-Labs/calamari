@@ -16,10 +16,13 @@ import java.nio.file.Paths;
 import java.security.Key;
 import java.security.KeyPair;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.starchartlabs.calamari.core.auth.ApplicationKey;
 import org.starchartlabs.calamari.core.exception.KeyLoadingException;
 import org.testng.Assert;
@@ -80,8 +83,12 @@ public class ApplicationKeyTest {
 
         String jwt = result.substring("Bearer ".length());
 
-        try (PEMReader r = new PEMReader(new StringReader(privateKey))) {
-            KeyPair keyPair = (KeyPair) r.readObject();
+        try (PEMParser r = new PEMParser(new StringReader(privateKey))) {
+            PEMKeyPair pemKeyPair = Optional.ofNullable((PEMKeyPair) r.readObject())
+                    .orElseThrow(() -> new KeyLoadingException(
+                            "Unable to parse valid private key data from provided content"));
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+            KeyPair keyPair = converter.getKeyPair(pemKeyPair);
             Key publicKey = keyPair.getPublic();
 
             Jws<Claims> generatedKey = Jwts.parser()

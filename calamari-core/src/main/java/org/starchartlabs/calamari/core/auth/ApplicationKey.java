@@ -21,7 +21,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.starchartlabs.alloy.core.Strings;
 import org.starchartlabs.alloy.core.Suppliers;
 import org.starchartlabs.calamari.core.exception.KeyLoadingException;
@@ -93,6 +95,10 @@ public class ApplicationKey implements Supplier<String> {
     /**
      * Generates a new JWT token from the private (signing) key reference and application ID
      *
+     * <p>
+     * Some conversion logic is based on discussion on <a href=
+     * "https://stackoverflow.com/questions/22920131/read-an-encrypted-private-key-with-bouncycastle-spongycastle">StackOverflow</a>
+     *
      * @return Generated JWT valid for up to ten minutes after this function is called
      * @throws KeyLoadingException
      *             If the is an error reading the signing key prior to use
@@ -100,10 +106,13 @@ public class ApplicationKey implements Supplier<String> {
     private String generateNewPayload() throws KeyLoadingException {
         String privateKey = privateKeySupplier.get();
 
-        try (PEMReader r = new PEMReader(new StringReader(privateKey))) {
-            KeyPair keyPair = Optional.ofNullable((KeyPair) r.readObject())
+        try (PEMParser r = new PEMParser(new StringReader(privateKey))) {
+            PEMKeyPair pemKeyPair = Optional.ofNullable((PEMKeyPair) r.readObject())
                     .orElseThrow(() -> new KeyLoadingException(
                             "Unable to parse valid private key data from provided content"));
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+            KeyPair keyPair = converter.getKeyPair(pemKeyPair);
+
             Key key = keyPair.getPrivate();
 
             ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
