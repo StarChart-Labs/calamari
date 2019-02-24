@@ -29,9 +29,13 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.gson.Gson;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.DeserializationException;
+import io.jsonwebtoken.io.Deserializer;
 
 public class ApplicationKeyTest {
 
@@ -92,6 +96,7 @@ public class ApplicationKeyTest {
             Key publicKey = keyPair.getPublic();
 
             Jws<Claims> generatedKey = Jwts.parser()
+                    .deserializeJsonWith(new GsonDeserializer<>())
                     .setSigningKey(publicKey)
                     .parseClaimsJws(jwt);
 
@@ -173,6 +178,34 @@ public class ApplicationKeyTest {
             return count;
         }
 
+    }
+
+    private static class GsonDeserializer<T> implements Deserializer<T> {
+
+        private final Class<T> returnType;
+
+        private final Gson gson;
+
+        @SuppressWarnings("unchecked")
+        public GsonDeserializer() {
+            this.gson = new Gson();
+            this.returnType = (Class<T>) Object.class;
+        }
+
+        @Override
+        public T deserialize(byte[] bytes) throws DeserializationException {
+            try {
+                return readValue(bytes);
+            } catch (Exception e) {
+                String msg = "Unable to deserialize bytes into a " + returnType.getName() + " instance: "
+                        + e.getMessage();
+                throw new DeserializationException(msg, e);
+            }
+        }
+
+        protected T readValue(byte[] bytes) throws IOException {
+            return gson.fromJson(new String(bytes, StandardCharsets.UTF_8), returnType);
+        }
     }
 
 }

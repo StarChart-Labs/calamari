@@ -12,7 +12,6 @@ dependencies {
     compile 'org.starchartlabs.alloy:alloy-core'
     
     runtime 'io.jsonwebtoken:jjwt-impl'
-    runtime 'io.jsonwebtoken:jjwt-jackson'
     
     testCompile 'com.squareup.okhttp3:mockwebserver'
     testCompile 'org.mockito:mockito-core'

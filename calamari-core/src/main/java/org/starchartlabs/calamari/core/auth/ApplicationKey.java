@@ -8,6 +8,7 @@ package org.starchartlabs.calamari.core.auth;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.Security;
@@ -15,6 +16,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -28,9 +30,14 @@ import org.starchartlabs.alloy.core.Strings;
 import org.starchartlabs.alloy.core.Suppliers;
 import org.starchartlabs.calamari.core.exception.KeyLoadingException;
 
+import com.google.gson.Gson;
+
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.SerializationException;
+import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.lang.Assert;
 
 /**
  * Represents an authentication key used to validate web requests to GitHub as a
@@ -52,6 +59,8 @@ public class ApplicationKey implements Supplier<String> {
 
     // The maximum is 10, include a tolerance to reduce caching error potential
     private static final int EXPIRATION_MINUTES = 9;
+
+    private static final Serializer<Map<String, ?>> SERIALIZER = new GsonSerializer<>();
 
     // Add security provider required for reading and using the private key which signed tokens
     static {
@@ -119,6 +128,7 @@ public class ApplicationKey implements Supplier<String> {
             ZonedDateTime expiration = now.plusMinutes(Math.min(EXPIRATION_MINUTES + 1, 10));
 
             JwtBuilder builder = Jwts.builder().setId(null)
+                    .serializeToJsonWith(SERIALIZER)
                     .setIssuedAt(toDate(now))
                     .setExpiration(toDate(expiration))
                     .setIssuer(githubAppId)
@@ -151,6 +161,41 @@ public class ApplicationKey implements Supplier<String> {
         Instant instant = input.toInstant();
 
         return new Date(instant.toEpochMilli());
+    }
+
+    /**
+     * Implementation-specific serializer which uses GSON with JJWT for JSON handling
+     *
+     * <p>
+     * Necessary until <a href="https://github.com/jwtk/jjwt/pull/414">JJWT's pull request</a> to add a standard GSON
+     * implementation is merged and released
+     *
+     * @author romeara
+     *
+     * @param <T>
+     *            Type to serialize
+     */
+    private static final class GsonSerializer<T> implements Serializer<T> {
+
+        private final Gson gson;
+
+        public GsonSerializer() {
+            this.gson = new Gson();
+        }
+
+        @Override
+        public byte[] serialize(T t) throws SerializationException {
+            Assert.notNull(t, "Object to serialize cannot be null.");
+            try {
+                return writeValueAsBytes(t);
+            } catch (Exception e) {
+                throw new SerializationException("Unable to serialize object: " + e.getMessage(), e);
+            }
+        }
+
+        private byte[] writeValueAsBytes(T t) {
+            return gson.toJson(t).getBytes(StandardCharsets.UTF_8);
+        }
     }
 
 }
