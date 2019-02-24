@@ -6,7 +6,8 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp'
     compile 'commons-codec:commons-codec'
     compile 'io.jsonwebtoken:jjwt'
-    compile 'org.bouncycastle:bcprov-jdk16'
+    compile 'org.bouncycastle:bcpkix-jdk15on'
+    compile 'org.bouncycastle:bcprov-jdk15on'
     compile 'org.slf4j:slf4j-api'
     compile 'org.starchartlabs.alloy:alloy-core'
     

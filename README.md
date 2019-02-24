@@ -4,11 +4,11 @@
 
 Octo-App(itizers): Utilities for building GitHub Apps
 
-## Importing
+## Using Versions 0.3.0 or Older
 
 Calamari is available on JCenter and Maven Central, but requires the BouncyCastle library for certain operations.
 
-Due to a security patch, this currently requires that consuming projects also allow `https://maven.repository.redhat.com/ga/` as a maven repository source in build configuration
+In versions 0.3.0 and older, Calamari used a security patch of these libraries, which required that consuming projects also allow `https://maven.repository.redhat.com/ga/` as a maven repository source in build configuration
 
 ## Contributing
 
