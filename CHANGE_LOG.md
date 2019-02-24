@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Changed
 - GH-17 Update to more recent bouncycastle library iterations, and switch to PEMParser from PEMReader
+- Update jackson-databind due to security vulnerabilities
 
 ## [0.3.0]
 ### Added
