@@ -12,7 +12,7 @@ In versions 0.3.0 and older, Calamari used a security patch of these libraries, 
 
 ## Contributing
 
-Information for how to contribute to Calamari can be found in [the contribution guidelines](./CONTRIBUTING.md)
+Information for how to contribute to Calamari can be found in [the contribution guidelines](./docs/CONTRIBUTING.md)
 
 ## Legal
 
