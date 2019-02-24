@@ -122,7 +122,7 @@ public class ApplicationKey implements Supplier<String> {
                     .setIssuedAt(toDate(now))
                     .setExpiration(toDate(expiration))
                     .setIssuer(githubAppId)
-                    .signWith(SignatureAlgorithm.RS256, key);
+                    .signWith(key, SignatureAlgorithm.RS256);
 
             return builder.compact();
         } catch (IOException e) {
