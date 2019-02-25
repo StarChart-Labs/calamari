@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.3.1]
 ### Changed
 - GH-17 Update to more recent bouncycastle library iterations, and switch to PEMParser from PEMReader
 - Update JJWT version, and switch to separated compile/runtime dependency setup
