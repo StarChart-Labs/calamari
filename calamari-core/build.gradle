@@ -5,11 +5,13 @@ dependencies {
     compile 'com.google.code.gson:gson'
     compile 'com.squareup.okhttp3:okhttp'
     compile 'commons-codec:commons-codec'
-    compile 'io.jsonwebtoken:jjwt'
+    compile 'io.jsonwebtoken:jjwt-api'
     compile 'org.bouncycastle:bcpkix-jdk15on'
     compile 'org.bouncycastle:bcprov-jdk15on'
     compile 'org.slf4j:slf4j-api'
     compile 'org.starchartlabs.alloy:alloy-core'
+    
+    runtime 'io.jsonwebtoken:jjwt-impl'
     
     testCompile 'com.squareup.okhttp3:mockwebserver'
     testCompile 'org.mockito:mockito-core'
