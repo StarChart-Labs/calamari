@@ -1,6 +1,6 @@
 # Calamari
 
-[![Travis CI](https://img.shields.io/travis/StarChart-Labs/calamari.svg?branch=master)](https://travis-ci.org/StarChart-Labs/calamari) [![codecov](https://codecov.io/gh/StarChart-Labs/calamari/branch/master/graph/badge.svg)](https://codecov.io/gh/StarChart-Labs/calamari)
+[![Travis CI](https://img.shields.io/travis/StarChart-Labs/calamari.svg?branch=master)](https://travis-ci.org/StarChart-Labs/calamari) [![codecov](https://codecov.io/gh/StarChart-Labs/calamari/branch/master/graph/badge.svg)](https://codecov.io/gh/StarChart-Labs/calamari) [![Black Duck Security Risk](https://copilot.blackducksoftware.com/github/repos/StarChart-Labs/calamari/branches/master/badge-risk.svg)](https://copilot.blackducksoftware.com/github/repos/StarChart-Labs/calamari/branches/master)
 
 Octo-App(itizers): Utilities for building GitHub Apps
 
