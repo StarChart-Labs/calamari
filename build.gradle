@@ -89,6 +89,10 @@ subprojects{
             properties['sonar.sources'] = sourceSets.main.java.srcDirs.findAll { it.exists() && !it.path.contains('resources') } ?: []
         }
     }
+    
+    tasks.withType(JavaCompile) {
+        options.deprecation = true
+    }
 
     //Apply module naming to all projects
     //Add LICENSE so it is included in all JARs, as well as dependent licenses, fulfilling the "distributions include license" requirement

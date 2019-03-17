@@ -11,7 +11,9 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.codec.digest.HmacAlgorithms;
 import org.apache.commons.codec.digest.HmacUtils;
+import org.starchartlabs.alloy.core.Suppliers;
 
 /**
  * Provides behavior to verify the source of a webhook event payload
@@ -21,7 +23,7 @@ import org.apache.commons.codec.digest.HmacUtils;
  */
 public class WebhookVerifier {
 
-    private final Supplier<String> secureTokenLookup;
+    private final Supplier<HmacUtils> hmacLookup;
 
     /**
      * @param secureTokenLookup
@@ -29,7 +31,9 @@ public class WebhookVerifier {
      * @since 0.1.0
      */
     public WebhookVerifier(Supplier<String> secureTokenLookup) {
-        this.secureTokenLookup = Objects.requireNonNull(secureTokenLookup);
+        Objects.requireNonNull(secureTokenLookup);
+
+        this.hmacLookup = Suppliers.map(secureTokenLookup, token -> new HmacUtils(HmacAlgorithms.HMAC_SHA_1, token));
     }
 
     /**
@@ -48,8 +52,7 @@ public class WebhookVerifier {
         boolean result = false;
 
         if (securityKey != null) {
-            String secureToken = secureTokenLookup.get();
-            String expected = "sha1=" + HmacUtils.hmacSha1Hex(secureToken, payload);
+            String expected = "sha1=" + hmacLookup.get().hmacHex(payload);
 
             result = Objects.equals(securityKey, expected);
         }
