@@ -5,10 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- GH-23 Switched to using constant-time `MessageDigest.isEqual(byte[], byte[])` to reduce effectiveness of timing attacks in code using WebhookVerifier
 
 ## [0.3.2]
 ### Changed
-
 - Updated external dependency versions to latest bugfix releases
 
 ## [0.3.1]
