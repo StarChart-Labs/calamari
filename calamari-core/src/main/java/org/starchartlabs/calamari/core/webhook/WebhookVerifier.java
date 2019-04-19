@@ -6,6 +6,7 @@
  */
 package org.starchartlabs.calamari.core.webhook;
 
+import java.security.MessageDigest;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -54,7 +55,9 @@ public class WebhookVerifier {
         if (securityKey != null) {
             String expected = "sha1=" + hmacLookup.get().hmacHex(payload);
 
-            result = Objects.equals(securityKey, expected);
+            // MessageDigest.isEqual is used here to guard against timing attacks - it was fixed in Java SE 6u17 to be
+            // resistant to them by using a constant-time algorithm
+            result = MessageDigest.isEqual(securityKey.getBytes(), expected.getBytes());
         }
 
         return result;
