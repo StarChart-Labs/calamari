@@ -253,7 +253,9 @@ public class InstallationAccessToken implements Supplier<String> {
 
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful()) {
-                return InstallationResponse.fromJson(response.body().string()).getAccessTokensUrl();
+                try (ResponseBody body = response.body()) {
+                    return InstallationResponse.fromJson(body.string()).getAccessTokensUrl();
+                }
             } else {
                 ResponseConditions.checkRateLimit(response);
 
