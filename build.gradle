@@ -4,57 +4,27 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath group: 'com.jfrog.bintray.gradle', name: 'gradle-bintray-plugin', version: '1.7.3'
-        classpath group: 'com.netflix.nebula', name: 'nebula-dependency-recommender', version: '4.2.0'
-        classpath group: 'com.netflix.nebula', name: 'nebula-publishing-plugin', version: '4.2.0'
-        classpath group: 'org.starchartlabs.flare', name: 'flare-operations-plugins', version: '1.1.0'
-        classpath group: 'org.starchartlabs.flare', name: 'flare-publishing-plugins', version: '0.3.0'
-    }
-}
-
-plugins {
-    id 'org.sonarqube' version '2.5'
-}
-
-if (project.hasProperty('sonarLogin')) {
-    System.setProperty('sonar.login', "${sonarLogin}")
-}
-
-sonarqube {
-    properties {
-        property 'sonar.projectName', 'Calamari'
-        property 'sonar.projectKey', 'org.starchartlabs.calamari:calamari'
-        property 'sonar.organization', 'starchart-labs'
-        property 'sonar.junit.reportsPath', file("${buildDir}/test-results/test")
-        property 'sonar.core.codeCoveragePlugin', 'jacoco'
-        property 'sonar.jacoco.reportPaths', "${buildDir}/jacoco/test.exec"
-        property 'sonar.host.url', 'https://sonarcloud.io'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'com.netflix.nebula:nebula-dependency-recommender:4.2.0'
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:4.2.0'
+        classpath 'org.starchartlabs.flare:flare-operations-plugins:2.0.0'
+        classpath 'org.starchartlabs.flare:flare-publishing-plugins:0.3.0'
     }
 }
 
 apply plugin: 'org.starchartlabs.flare.merge-coverage-reports'
 
-mergeCoverageReports {
-    reports {
-        xml.enabled true
-        html.enabled false
-        csv.enabled false
-        
-        xml.destination = "${buildDir}/reports/jacoco/report.xml"
-    }
-}
-
 allprojects{
     apply plugin: 'eclipse'
     apply plugin: 'nebula.dependency-recommender'
     apply plugin: 'nebula.maven-resolved-dependencies'
-    apply plugin: 'org.starchartlabs.flare.dependency-insight'
+    apply plugin: 'org.starchartlabs.flare.dependency-reporting'
 
     dependencyRecommendations {
         propertiesFile file: file("${rootDir}/dependencies.properties")
     }
 
-    //Always download sources, to allow debugging, and use Eclipse containers for greater portability
+    // Always download sources, to allow debugging, and use Eclipse containers for greater portability
     eclipse {
         classpath {
             downloadSources=true
@@ -78,20 +48,10 @@ subprojects{
     apply plugin: 'org.starchartlabs.flare.source-jars'
     apply plugin: 'org.starchartlabs.flare.published-project'
     
-    //Setup default test behavior, including failure logging
+    // Setup default test behavior, including failure logging
     test {
         useTestNG() {
             useDefaultListeners = true
-        }
-    }
-    
-    sonarqube {
-        properties {
-            property 'sonar.projectKey', "${project.group}:${project.name}"
-            property 'sonar.junit.reportsPath', file("${buildDir}/test-results/test")
-            property 'sonar.core.codeCoveragePlugin', 'jacoco'
-            property 'sonar.jacoco.reportPaths', "${buildDir}/jacoco/test.exec"
-            properties['sonar.sources'] = sourceSets.main.java.srcDirs.findAll { it.exists() && !it.path.contains('resources') } ?: []
         }
     }
     
@@ -99,8 +59,8 @@ subprojects{
         options.deprecation = true
     }
 
-    //Apply module naming to all projects
-    //Add LICENSE so it is included in all JARs, as well as dependent licenses, fulfilling the "distributions include license" requirement
+    // Apply module naming to all projects
+    // Add LICENSE so it is included in all JARs, as well as dependent licenses, fulfilling the "distributions include license" requirement
     jar {
         manifest {
             attributes("Automatic-Module-Name": "${project.group}.${project.name  - 'calamari-'}".replaceAll("-", "."))
@@ -111,7 +71,7 @@ subprojects{
         }
     }
     
-    //All projects should provide source code and javadoc, and upload these with any released artifacts
+    // All projects should provide source code and javadoc, and upload these with any released artifacts
     sourcesJar {
         from("${rootDir}"){
             include 'LICENSE'
@@ -124,7 +84,7 @@ subprojects{
         }
     }
 
-    //If not a remote run, publish to local only
+    // If not a remote run, publish to local only
     if(!project.hasProperty('remoteDeploy')){
         publishing {
             repositories {
