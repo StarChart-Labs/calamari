@@ -1,21 +1,21 @@
 description = 'Utilities for interacting with GitHub as a GitHub App'
 
 dependencies {
-    compile 'com.google.code.findbugs:jsr305'
-    compile 'com.google.code.gson:gson'
-    compile 'com.squareup.okhttp3:okhttp'
-    compile 'commons-codec:commons-codec'
-    compile 'io.jsonwebtoken:jjwt-api'
-    compile 'org.bouncycastle:bcpkix-jdk15on'
-    compile 'org.bouncycastle:bcprov-jdk15on'
-    compile 'org.slf4j:slf4j-api'
-    compile 'org.starchartlabs.alloy:alloy-core'
+    compileOnly 'com.google.code.findbugs:jsr305'
     
-    runtime 'io.jsonwebtoken:jjwt-impl'
+    api 'com.google.code.gson:gson'
+    api 'com.squareup.okhttp3:okhttp'
+    api 'commons-codec:commons-codec'
+    api 'io.jsonwebtoken:jjwt-api'
+    api 'org.bouncycastle:bcpkix-jdk15on'
+    api 'org.bouncycastle:bcprov-jdk15on'
+    api 'org.slf4j:slf4j-api'
+    api 'org.starchartlabs.alloy:alloy-core'
     
-    testCompile 'com.squareup.okhttp3:mockwebserver'
-    testCompile 'org.mockito:mockito-core'
-    testCompile 'org.testng:testng'
+    implementation 'io.jsonwebtoken:jjwt-impl'
     
-    testRuntime 'org.slf4j:slf4j-simple'
+    testImplementation 'com.squareup.okhttp3:mockwebserver'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.slf4j:slf4j-simple'
+    testImplementation 'org.testng:testng'
 }
