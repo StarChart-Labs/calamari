@@ -75,6 +75,16 @@ subprojects{
             }
         }
     }
+    
+    // TODO romeara Workaround to lack of defaults on published POM for name and description, until added in flare-plugins
+    project.afterEvaluate { p ->
+        publishing.publications.withType(MavenPublication.class).all { publication -> 
+            publication.pom {
+                name = "${project.name}"
+                description = "${project.description}"
+            }
+        }
+    }
 
     // If not a remote run, publish to local only
     if(!project.hasProperty('remoteDeploy')){
@@ -112,12 +122,11 @@ subprojects{
         }
     }
     
+    // TODO romeara workaround until deferred credential reading is available in flare-plugins
     bintrayUpload {
         doFirst {
-            project.bintray {
-                user = "${credentials.bintray.username}"
-                key = "${credentials.bintray.password}"
-            }
+            user = "${credentials.bintray.username}"
+            apiKey = "${credentials.bintray.password}"
         }
     }
     
