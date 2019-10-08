@@ -59,23 +59,68 @@ public class InstallationAccessTokenTest {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void constructNullInstallationAccessTokenUrl() throws Exception {
+    public void constructDefaultMediaAndCacheNullInstallationAccessTokenUrl() throws Exception {
         new InstallationAccessToken(null, applicationKey, "userAgent");
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void constructNullApplicationKey() throws Exception {
+    public void constructDefaultMediaAndCacheNullApplicationKey() throws Exception {
         new InstallationAccessToken("http://url", null, "userAgent");
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void constructNullUserAgent() throws Exception {
+    public void constructDefaultMediaAndCacheNullUserAgent() throws Exception {
         new InstallationAccessToken("http://url", applicationKey, null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void contructNullMediaType() throws Exception {
+    public void constructDefaultCacheNullInstallationAccessTokenUrl() throws Exception {
+        new InstallationAccessToken(null, applicationKey, "userAgent", "mediaType");
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void constructDefaultCacheNullApplicationKey() throws Exception {
+        new InstallationAccessToken("http://url", null, "userAgent", "mediaType");
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void constructDefaultCacheNullUserAgent() throws Exception {
+        new InstallationAccessToken("http://url", applicationKey, null, "mediaType");
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void contructDefaultCacheNullMediaType() throws Exception {
         new InstallationAccessToken("http://url", applicationKey, "userAgent", null);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void constructNullInstallationAccessTokenUrl() throws Exception {
+        new InstallationAccessToken(null, applicationKey, "userAgent", "mediaType", 5);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void constructNullApplicationKey() throws Exception {
+        new InstallationAccessToken("http://url", null, "userAgent", "mediaType", 5);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void constructNullUserAgent() throws Exception {
+        new InstallationAccessToken("http://url", applicationKey, null, "mediaType", 5);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void contructNullMediaType() throws Exception {
+        new InstallationAccessToken("http://url", applicationKey, "userAgent", null, 5);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void constructZeroCacheExpiration() throws Exception {
+        new InstallationAccessToken("http://url", applicationKey, "userAgent", "mediaType", 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void constructTooManyCacheExpiration() throws Exception {
+        new InstallationAccessToken("http://url", applicationKey, "userAgent", "mediaType", 61);
     }
 
     @Test(expectedExceptions = NullPointerException.class)

@@ -26,6 +26,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.starchartlabs.alloy.core.Preconditions;
 import org.starchartlabs.alloy.core.Strings;
 import org.starchartlabs.alloy.core.Suppliers;
 import org.starchartlabs.calamari.core.exception.KeyLoadingException;
@@ -58,7 +59,7 @@ import io.jsonwebtoken.lang.Assert;
 public class ApplicationKey implements Supplier<String> {
 
     // The maximum is 10, include a tolerance to reduce caching error potential
-    private static final int EXPIRATION_MINUTES = 9;
+    private static final int DEFAULT_EXPIRATION_MINUTES = 8;
 
     private static final Serializer<Map<String, ?>> SERIALIZER = new GsonSerializer<>();
 
@@ -73,6 +74,8 @@ public class ApplicationKey implements Supplier<String> {
 
     private final Supplier<String> headerSupplier;
 
+    private final int cacheExpirationMinutes;
+
     /**
      * @param githubAppId
      *            Unique identifier provided by GitHub for the App
@@ -82,12 +85,33 @@ public class ApplicationKey implements Supplier<String> {
      * @since 0.1.0
      */
     public ApplicationKey(String githubAppId, Supplier<String> privateKeySupplier) {
+        this(githubAppId, privateKeySupplier, DEFAULT_EXPIRATION_MINUTES);
+    }
+
+    /**
+     * @param githubAppId
+     *            Unique identifier provided by GitHub for the App
+     * @param privateKeySupplier
+     *            Supplier which allows lookup of the private (signing) key issued by GitHub for creating JWT tokens
+     *            used in web requests
+     * @param cacheExpirationMinutes
+     *            Number of minutes to cache generated JWT tokens for authentication with GitHub, maximum 10
+     * @since 0.4.0
+     */
+    public ApplicationKey(String githubAppId, Supplier<String> privateKeySupplier, int cacheExpirationMinutes) {
         this.githubAppId = Objects.requireNonNull(githubAppId);
         this.privateKeySupplier = Objects.requireNonNull(privateKeySupplier);
 
+        Preconditions.checkArgument(cacheExpirationMinutes > 0, "Must provide an expiration time greater than zero");
+        Preconditions.checkArgument(cacheExpirationMinutes <= 10,
+                "Must provide an expiration time less than or equal to 10");
+
+        this.cacheExpirationMinutes = cacheExpirationMinutes;
         this.headerSupplier = Suppliers.map(
-                Suppliers.memoizeWithExpiration(this::generateNewPayload, EXPIRATION_MINUTES, TimeUnit.MINUTES),
+                Suppliers.memoizeWithExpiration(this::generateNewPayload, this.cacheExpirationMinutes,
+                        TimeUnit.MINUTES),
                 ApplicationKey::toAuthorizationHeader);
+
     }
 
     /**
@@ -124,8 +148,9 @@ public class ApplicationKey implements Supplier<String> {
 
             Key key = keyPair.getPrivate();
 
+            // We add a minute to the expiration to give the cache a buffer, preventing stale keys from being cached
             ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-            ZonedDateTime expiration = now.plusMinutes(Math.min(EXPIRATION_MINUTES + 1, 10));
+            ZonedDateTime expiration = now.plusMinutes(Math.min(cacheExpirationMinutes + 1, 10));
 
             JwtBuilder builder = Jwts.builder().setId(null)
                     .serializeToJsonWith(SERIALIZER)

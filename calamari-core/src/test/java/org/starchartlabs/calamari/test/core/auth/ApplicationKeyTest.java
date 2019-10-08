@@ -53,14 +53,35 @@ public class ApplicationKeyTest {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void constructNullGitHubAppId() throws Exception {
+    public void constructDefaultCacheNullGitHubAppId() throws Exception {
         new ApplicationKey(null, () -> "string");
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void constructNullPrivateKeySupplier() throws Exception {
+    public void constructDefaultCacheNullPrivateKeySupplier() throws Exception {
         new ApplicationKey("gitHubAppId", null);
     }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void constructNullGitHubAppId() throws Exception {
+        new ApplicationKey(null, () -> "string", 5);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void constructNullPrivateKeySupplier() throws Exception {
+        new ApplicationKey("gitHubAppId", null, 5);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void constructZeroCacheExpirationMinutes() throws Exception {
+        new ApplicationKey("gitHubAppId", () -> "string", 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void constructTooManyCacheExpirationMinutes() throws Exception {
+        new ApplicationKey("gitHubAppId", () -> "string", 11);
+    }
+
 
     @Test(expectedExceptions = KeyLoadingException.class)
     public void getInvalidPrivateKey() throws Exception {
