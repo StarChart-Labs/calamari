@@ -29,6 +29,7 @@ allprojects{
 
 subprojects{
     apply plugin: 'java-library'
+    apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
     apply plugin: 'maven-publish'
     apply plugin: 'com.jfrog.bintray'
@@ -42,6 +43,18 @@ subprojects{
             mit()
         }
     }
+    
+    checkstyle {
+        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+        configProperties = [ 'checkstyle.config.dir' : rootProject.file('config/checkstyle') ]
+        toolVersion = '8.25'
+    }
+     
+    task checkstyleAll{}
+     
+    tasks.withType(Checkstyle).all { checkstyleTask -> checkstyleAll.dependsOn checkstyleTask }
+     
+    check.dependsOn checkstyleAll
     
     // Setup default test behavior, including failure logging
     test {
