@@ -195,7 +195,7 @@ public class PagingLinks {
 
         try {
             result = Integer.valueOf(candidate);
-        }catch(NumberFormatException e) {
+        } catch (NumberFormatException e) {
             // The way this function is used, this should not occur
             logger.warn("Non-numeric parameter value encountered: {}", candidate);
         }
