@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Add missing handling for HTTP response body in InstallationAccessToken
 - Added Checkstyle tooling and fixed one existing formatting issue
+- (GH-34) Reduce default cache/expiration times for access/installation tokens to reduce possible clock errors with GitHub handshake
+- (GH-34) Add ability to configure cache expiration time for access and installation tokens
+- Update dependencies to latest minor/micro revisions. Major revision updates will wait until a major revision of this library
 
 ## [0.3.3]
 ### Changed

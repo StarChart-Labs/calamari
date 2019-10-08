@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import org.starchartlabs.alloy.core.Preconditions;
 import org.starchartlabs.alloy.core.Strings;
 import org.starchartlabs.alloy.core.Suppliers;
 import org.starchartlabs.calamari.core.MediaTypes;
@@ -48,7 +49,7 @@ import okhttp3.ResponseBody;
 public class InstallationAccessToken implements Supplier<String> {
 
     // The maximum is 60, allow for some drift
-    private static final int EXPIRATION_MINUTES = 59;
+    private static final int DEFAULT_EXPIRATION_MINUTES = 58;
 
     private static final Gson GSON = new GsonBuilder().create();
 
@@ -64,6 +65,8 @@ public class InstallationAccessToken implements Supplier<String> {
 
     private final Supplier<String> headerSupplier;
 
+    private final int cacheExpirationMinutes;
+
     /**
      * @param installationAccessTokenUrl
      *            URL which represents access token resources for a specific GitHub App installation
@@ -75,7 +78,7 @@ public class InstallationAccessToken implements Supplier<String> {
      * @since 0.1.0
      */
     public InstallationAccessToken(String installationAccessTokenUrl, ApplicationKey applicationKey, String userAgent) {
-        this(installationAccessTokenUrl, applicationKey, userAgent, MediaTypes.APP_PREVIEW);
+        this(installationAccessTokenUrl, applicationKey, userAgent, MediaTypes.APP_PREVIEW, DEFAULT_EXPIRATION_MINUTES);
     }
 
     /**
@@ -92,14 +95,38 @@ public class InstallationAccessToken implements Supplier<String> {
      */
     public InstallationAccessToken(String installationAccessTokenUrl, ApplicationKey applicationKey,
             String userAgent, String mediaType) {
+        this(installationAccessTokenUrl, applicationKey, userAgent, mediaType, DEFAULT_EXPIRATION_MINUTES);
+    }
+
+    /**
+     * @param installationAccessTokenUrl
+     *            URL which represents access token resources for a specific GitHub App installation
+     * @param applicationKey
+     *            Key used to access GitHub web resources as a GitHub App outside an installation context
+     * @param userAgent
+     *            The user agent to make web requests as, as
+     *            <a href="https://developer.github.com/v3/#user-agent-required">required by GitHub</a>
+     * @param mediaType
+     *            The media type to request from the server via {@code Accept} header
+     * @param cacheExpirationMinutes
+     *            Number of minutes to cache generated bearer tokens for authentication with GitHub, maximum 60
+     * @since 0.4.0
+     */
+    public InstallationAccessToken(String installationAccessTokenUrl, ApplicationKey applicationKey,
+            String userAgent, String mediaType, int cacheExpirationMinutes) {
         this.applicationKey = Objects.requireNonNull(applicationKey);
         this.installationAccessTokenUrl = Objects.requireNonNull(installationAccessTokenUrl);
         this.userAgent = Objects.requireNonNull(userAgent);
         this.mediaType = Objects.requireNonNull(mediaType);
 
+        Preconditions.checkArgument(cacheExpirationMinutes > 0, "Must provide an expiration time greater than zero");
+        Preconditions.checkArgument(cacheExpirationMinutes <= 60,
+                "Must provide an expiration time less than or equal to 60");
+
         httpClient = new OkHttpClient();
+        this.cacheExpirationMinutes = cacheExpirationMinutes;
         headerSupplier = Suppliers.map(
-                Suppliers.memoizeWithExpiration(this::generateNewToken, EXPIRATION_MINUTES, TimeUnit.MINUTES),
+                Suppliers.memoizeWithExpiration(this::generateNewToken, this.cacheExpirationMinutes, TimeUnit.MINUTES),
                 InstallationAccessToken::toAuthorizationHeader);
     }
 
