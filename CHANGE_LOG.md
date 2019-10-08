@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Changed
 - Add missing handling for HTTP response body in InstallationAccessToken
+- Update dependencies to latest minor/micro revisions. Major revision updates will wait until a major revision of this library
 
 ## [0.3.3]
 ### Changed
