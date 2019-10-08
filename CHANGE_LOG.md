@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Changed
 - Add missing handling for HTTP response body in InstallationAccessToken
-- Added Checkstyle tooling and fixed on existing formatting issue
+- Added Checkstyle tooling and fixed one existing formatting issue
 
 ## [0.3.3]
 ### Changed
