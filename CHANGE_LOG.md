@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.4.1]
 ### Changed
 - Updated io.jsonwebtoken:jjwt-api and io.jsonwebtoken:jjwt-impl to 0.10.7 from 0.10.6
 - Updated org.bouncycastle:bcpkix-jdk15on and org.bouncycastle:bcprove-jdk15on to 1.64 from 1.63
