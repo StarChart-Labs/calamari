@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Updated io.jsonwebtoken:jjwt-api and io.jsonwebtoken:jjwt-impl to 0.10.7 from 0.10.6
+- Updated org.bouncycastle:bcpkix-jdk15on and org.bouncycastle:bcprove-jdk15on to 1.64 from 1.63
+- Updated org.slf4j:slf4j-api and org.slf4j:slf4j-simple to 1.7.29 from 1.7.28
 
 ## [0.4.0]
 ### Changed
