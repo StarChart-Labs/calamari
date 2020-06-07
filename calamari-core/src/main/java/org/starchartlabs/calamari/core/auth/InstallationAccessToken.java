@@ -153,7 +153,7 @@ public class InstallationAccessToken implements Supplier<String> {
     private String generateNewToken() {
         HttpUrl url = HttpUrl.parse(installationAccessTokenUrl);
 
-        RequestBody requestBody = RequestBody.create(null, new byte[] {});
+        RequestBody requestBody = RequestBody.create(new byte[] {}, null);
         Request request = new Request.Builder()
                 .post(requestBody)
                 .header("Authorization", applicationKey.get())
