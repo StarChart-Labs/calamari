@@ -172,7 +172,9 @@ public class PagingLinksTest {
         Assert.assertFalse(result.equals(null));
     }
 
+    // Suppress unlikely argument type, as this test is specifically to validate behavior in that case
     @Test
+    @SuppressWarnings("unlikely-arg-type")
     public void equalsDifferentClass() throws Exception {
         PagingLinks result = new PagingLinks(Arrays.asList(ALL_HEADERS));
 

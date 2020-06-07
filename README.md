@@ -4,7 +4,13 @@
 
 Octo-App(itizers): Utilities for building GitHub Apps
 
-## Using Versions 0.3.0 or Older
+## Compatibility
+
+### Major Version Migrations
+
+For steps to migrate between major versions of Calamari, see [the migration guide](./docs/MIGRATION.md)
+
+### Using Versions 0.3.0 or Older
 
 Calamari is available on JCenter and Maven Central, but requires the BouncyCastle library for certain operations.
 
