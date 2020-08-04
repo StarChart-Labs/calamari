@@ -12,6 +12,7 @@ dependencies {
     api 'org.slf4j:slf4j-api'
     api 'org.starchartlabs.alloy:alloy-core'
     
+    implementation 'io.jsonwebtoken:jjwt-gson'
     implementation 'io.jsonwebtoken:jjwt-impl'
     
     testImplementation 'com.squareup.okhttp3:mockwebserver'
