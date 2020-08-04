@@ -6,8 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Changed
-- (GH-37) Update OkHttp to newest major version, 4.7.2
+- (GH-37) Update OkHttp to newest major version, 4.8.0
 - (GH-20) Update JJWT to 0.11.2 to allow removal of custom GSON serialization handling
+- Update Commons-Codex from 1.13 to 1.14
+- Update Bouncycastle bcpkix-jdk15on and bcprov-jdk15on from 1.64 to 1.66
+- Update alloy-core from 0.5.0 to 1.0.0
+- Update Mockito from 2.28.2 to 3.3.3
+- Update SLF4J from 1.7.29 to 1.7.30
+- Update TestNG from 6.14.3 to 7.3.0
 
 ## [0.4.1]
 ### Changed
