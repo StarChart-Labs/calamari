@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Changed
 - (GH-37) Update OkHttp to newest major version, 4.7.2
+- (GH-20) Update JJWT to 0.11.2 to allow removal of custom GSON serialization handling
 
 ## [0.4.1]
 ### Changed
