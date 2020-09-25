@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.0.0]
 ### Changed
 - (GH-37) Update OkHttp to newest major version, 4.8.0
 - (GH-20) Update JJWT to 0.11.2 to allow removal of custom GSON serialization handling
