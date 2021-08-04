@@ -44,16 +44,20 @@ public class FileContentLoaderTest {
 
     private FileContentLoader fileContentLoader;
 
+    private AutoCloseable mocks;
+
     @BeforeMethod
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        mocks = MockitoAnnotations.openMocks(this);
 
         fileContentLoader = new FileContentLoader("userAgent");
     }
 
     @AfterMethod
-    public void teardown() {
+    public void teardown() throws Exception {
         Mockito.verifyNoMoreInteractions(accessToken);
+
+        mocks.close();
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -90,7 +94,6 @@ public class FileContentLoaderTest {
     public void loadContentsNullPath() throws Exception {
         fileContentLoader.loadContents(accessToken, "repositoryUrl", "ref", null);
     }
-
 
     @Test(expectedExceptions = GitHubResponseException.class)
     public void loadContentsErrorResponse() throws Exception {

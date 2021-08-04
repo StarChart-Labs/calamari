@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Updated com.google.code.gson:gson from 2.8.6 to 2.8.7
+- Updated com.squareup.okhttp3:mockwebserver from 4.8.0 to 4.9.1
+- Updated com.squareup.okhttp3:okhttp from 4.8.0 to 4.9.1
+- Updated commons-codec:commons-codec from 1.14 to 1.15
+- Removed override of ant version and updated org.testng:testng from 7.3.0 to 7.4.0
+- Updated org.bouncycastle:bcpkix-jdk15on from 1.66 to 1.69
+- Updated org.bouncycastle:bcprov-jdk15on from 1.66 to 1.69
+- Updated org.starchartlabs.alloy:alloy-core from 1.0.0 to 1.0.1
+- Updated org.mockito:mockito-core from 3.3.3 to 3.11.2
+- Updated org.slf4j:slf4j-api from 1.7.30 to 1.7.32
+- Updated org.slf4j:slf4j-simple from 1.7.30 to 1.7.32
 
 ## [1.0.0]
 ### Changed
