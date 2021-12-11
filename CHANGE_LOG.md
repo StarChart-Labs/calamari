@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.0.2]
 ### Changed
 - Updated com.google.code.gson:gson from 2.8.7 to 2.8.9
 - Updated com.squareup.okhttp3:mockwebserver from 4.9.1 to 4.9.3
