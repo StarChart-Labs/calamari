@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Updated com.google.code.gson:gson from 2.8.7 to 2.8.9
+- Updated com.squareup.okhttp3:mockwebserver from 4.9.1 to 4.9.3
+- Updated com.squareup.okhttp3:okhttp from 4.9.1 to 4.9.3
+- Updated org.bouncycastle:bcpkix-jdk15on from 1.69 to 1.70
+- Updated org.bouncycastle:bcprov-jdk15on from 1.69 to 1.70
+- Updated org.starchartlabs.alloy:alloy-core from 1.0.1 to 1.0.2
+- Updated org.mockito:mockito-core from 3.11.2 to 4.1.0
 
 ## [1.0.1]
 ### Changed
