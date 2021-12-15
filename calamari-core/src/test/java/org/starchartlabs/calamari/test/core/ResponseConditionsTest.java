@@ -10,9 +10,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.starchartlabs.calamari.core.ResponseConditions;
 import org.starchartlabs.calamari.core.exception.RequestLimitExceededException;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import okhttp3.Protocol;
@@ -69,6 +71,56 @@ public class ResponseConditionsTest {
     }
 
     @Test(expectedExceptions = NullPointerException.class)
+    public void validateRateLimitResponseNullResponse() throws Exception {
+        ResponseConditions.validateRateLimit(null);
+    }
+
+    @Test
+    public void validateRateLimitResponseNotExceeded() throws Exception {
+        Response response = getResponseBuilder()
+                .code(100)
+                .header(RATE_LIMIT_MAXIMUM_HEADER, "1000")
+                .header(RATE_LIMIT_RESET_HEADER, "5")
+                .header(RATE_LIMIT_REMAINING_HEADER, "500")
+                .build();
+
+        Optional<RequestLimitExceededException> result = ResponseConditions.validateRateLimit(response);
+
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void validateRateLimitResponseNotExceededForbidden() throws Exception {
+        Response response = getResponseBuilder()
+                .code(403)
+                .header(RATE_LIMIT_MAXIMUM_HEADER, "1000")
+                .header(RATE_LIMIT_RESET_HEADER, "5")
+                .header(RATE_LIMIT_REMAINING_HEADER, "500")
+                .build();
+
+        Optional<RequestLimitExceededException> result = ResponseConditions.validateRateLimit(response);
+
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void validateRateLimitResponse() throws Exception {
+        Response response = getResponseBuilder()
+                .code(403)
+                .header(RATE_LIMIT_MAXIMUM_HEADER, "1000")
+                .header(RATE_LIMIT_RESET_HEADER, "5")
+                .header(RATE_LIMIT_REMAINING_HEADER, "0")
+                .build();
+
+        Optional<RequestLimitExceededException> result = ResponseConditions.validateRateLimit(response);
+
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.isPresent());
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
     public void checkRateLimitNullResponse() throws Exception {
         ResponseConditions.checkRateLimit((String) null, a -> 100, (a, b) -> Collections.emptyList());
     }
@@ -111,6 +163,63 @@ public class ResponseConditionsTest {
         headers.put(RATE_LIMIT_REMAINING_HEADER, Collections.singleton("0"));
 
         ResponseConditions.checkRateLimit("a", a -> 403, (a, b) -> headers.get(b));
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void validateRateLimitNullResponse() throws Exception {
+        ResponseConditions.validateRateLimit((String) null, a -> 100, (a, b) -> Collections.emptyList());
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void validateRateLimitNullCodeLookup() throws Exception {
+        ResponseConditions.validateRateLimit("a", null, (a, b) -> Collections.emptyList());
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void validateRateLimitNullHeaderLookup() throws Exception {
+        ResponseConditions.validateRateLimit("a", a -> 100, null);
+    }
+
+    @Test
+    public void validateRateLimitNotExceeded() throws Exception {
+        Map<String, Collection<String>> headers = new HashMap<>();
+        headers.put(RATE_LIMIT_MAXIMUM_HEADER, Collections.singleton("1000"));
+        headers.put(RATE_LIMIT_RESET_HEADER, Collections.singleton("5"));
+        headers.put(RATE_LIMIT_REMAINING_HEADER, Collections.singleton("500"));
+
+        Optional<RequestLimitExceededException> result = ResponseConditions.validateRateLimit("a", a -> 100,
+                (a, b) -> headers.get(b));
+
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void validateRateLimitNotExceededForbidden() throws Exception {
+        Map<String, Collection<String>> headers = new HashMap<>();
+        headers.put(RATE_LIMIT_MAXIMUM_HEADER, Collections.singleton("1000"));
+        headers.put(RATE_LIMIT_RESET_HEADER, Collections.singleton("5"));
+        headers.put(RATE_LIMIT_REMAINING_HEADER, Collections.singleton("500"));
+
+        Optional<RequestLimitExceededException> result = ResponseConditions.validateRateLimit("a", a -> 403,
+                (a, b) -> headers.get(b));
+
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void validateRateLimit() throws Exception {
+        Map<String, Collection<String>> headers = new HashMap<>();
+        headers.put(RATE_LIMIT_MAXIMUM_HEADER, Collections.singleton("1000"));
+        headers.put(RATE_LIMIT_RESET_HEADER, Collections.singleton("5"));
+        headers.put(RATE_LIMIT_REMAINING_HEADER, Collections.singleton("0"));
+
+        Optional<RequestLimitExceededException> result = ResponseConditions.validateRateLimit("a", a -> 403,
+                (a, b) -> headers.get(b));
+
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.isPresent());
     }
 
     private Response.Builder getResponseBuilder() {

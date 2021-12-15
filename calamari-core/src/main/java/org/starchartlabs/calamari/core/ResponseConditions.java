@@ -54,6 +54,31 @@ public class ResponseConditions {
      * Analyzes a web response to determine if it represents exceeding GitHub's rate limits
      *
      * <p>
+     * If the response does represent exceeded rate limiting, returns a {@link RequestLimitExceededException}
+     *
+     * <p>
+     * Intended for use in streamed responses, such as a Mono. If the exception should be thrown immediately, use
+     * {@link #checkRateLimit(Response)}
+     *
+     * <p>
+     * To use this check with other web libraries, see {@link #validateRateLimit(Object, Function, BiFunction)}
+     *
+     * @param response
+     *            OkHttp3 representation of a web response
+     * @return A {@link RequestLimitExceededException} If the provided response represents exceeding GitHub's rate
+     *         limiting, empty optional otherwise
+     * @since 1.0.3
+     */
+    public static Optional<RequestLimitExceededException> validateRateLimit(Response response) {
+        Objects.requireNonNull(response);
+
+        return validateRateLimit(response, Response::code, (res, header) -> res.headers().values(header));
+    }
+
+    /**
+     * Analyzes a web response to determine if it represents exceeding GitHub's rate limits
+     *
+     * <p>
      * If the response does represent exceeded rate limiting, throws a {@link RequestLimitExceededException}
      *
      * @param response
@@ -72,6 +97,44 @@ public class ResponseConditions {
     public static <T> void checkRateLimit(T response, Function<T, Integer> codeLookup,
             BiFunction<T, String, Collection<String>> headerLookup) throws RequestLimitExceededException {
         Objects.requireNonNull(response);
+        Objects.requireNonNull(codeLookup);
+        Objects.requireNonNull(headerLookup);
+
+        Optional<RequestLimitExceededException> rateLimitViolation = validateRateLimit(response, codeLookup,
+                headerLookup);
+
+        if (rateLimitViolation.isPresent()) {
+            throw rateLimitViolation.get();
+        }
+    }
+
+    /**
+     * Analyzes a web response to determine if it represents exceeding GitHub's rate limits
+     *
+     * <p>
+     * If the response does represent exceeded rate limiting, returns a {@link RequestLimitExceededException}
+     * 
+     * <p>
+     * Intended for use in streamed responses, such as a Mono. If the exception should be thrown immediately, use
+     * {@link #checkRateLimit(Object, Function, BiFunction)}
+     *
+     * @param response
+     *            Representation of a web response
+     * @param codeLookup
+     *            Function which reads the HTTP status code from the provided response
+     * @param headerLookup
+     *            Function which takes a response and header value as input, and produces all instances of that header
+     *            from the response
+     * @param <T>
+     *            Java type representing a web response
+     * @return A {@link RequestLimitExceededException} If the provided response represents exceeding GitHub's rate
+     *         limiting, empty optional otherwise
+     * @since 1.0.3
+     */
+    public static <T> Optional<RequestLimitExceededException> validateRateLimit(T response,
+            Function<T, Integer> codeLookup, BiFunction<T, String, Collection<String>> headerLookup) {
+        Objects.requireNonNull(response);
+        Objects.requireNonNull(codeLookup);
         Objects.requireNonNull(headerLookup);
 
         String limit = Optional.ofNullable(headerLookup.apply(response, RATE_LIMIT_MAXIMUM_HEADER))
@@ -91,9 +154,7 @@ public class ResponseConditions {
 
         boolean rateLimitExceeded = Objects.equals(codeLookup.apply(response), 403) && remaining.contains("0");
 
-        if (rateLimitExceeded) {
-            throw new RequestLimitExceededException(limit, reset);
-        }
+        return rateLimitExceeded ? Optional.of(new RequestLimitExceededException(limit, reset)) : Optional.empty();
     }
 
 }
