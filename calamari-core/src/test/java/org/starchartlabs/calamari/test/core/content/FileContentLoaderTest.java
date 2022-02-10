@@ -413,6 +413,58 @@ public class FileContentLoaderTest {
         }
     }
 
+    @Test(expectedExceptions = NullPointerException.class)
+    public void decodeFileContentNullEncoding() throws Exception {
+        String encodedContent = "VGhpcyBpcyB0ZXN0IHRleHQ=";
+
+        FileContentLoader.decodeFileContent(null, encodedContent);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void decodeFileContentNullEncodedContents() throws Exception {
+        String encoding = "base64";
+
+        FileContentLoader.decodeFileContent(encoding, null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void decodeFileContentUnsupportedEncoding() throws Exception {
+        String encoding = "base6";
+        String encodedContent = "VGhpcyBpcyB0ZXN0IHRleHQ=";
+
+        FileContentLoader.decodeFileContent(encoding, encodedContent);
+    }
+
+    @Test
+    public void decodeFileContent() throws Exception {
+        String encoding = "base64";
+        String encodedContent = "VGhpcyBpcyB0ZXN0IHRleHQ=";
+        String expectedContents = "This is test text";
+
+        String result = FileContentLoader.decodeFileContent(encoding, encodedContent);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result, expectedContents);
+    }
+
+    @Test
+    public void decodeFileContentMimeEncoding() throws Exception {
+        String encoding = "base64";
+        String encodedContent = "cHJvZHVjdGlvbkZpbGVzOgogICBpbmNsdWRlOgogICAgICAtICcqKi9SRUFETUUqJwpyZWxlYXNlTm90ZUZpbGVzOgogICBpbmNsdWRlOgogICAgICAtICcqKi9DSEFOR0UqTE9HKicKICAgICAgLSAnKiovUkVMRUFTRSpOT1RFUyonCg==";
+        String expectedContents = "productionFiles:\n" +
+                "   include:\n" +
+                "      - '**/README*'\n" +
+                "releaseNoteFiles:\n" +
+                "   include:\n" +
+                "      - '**/CHANGE*LOG*'\n" +
+                "      - '**/RELEASE*NOTES*'\n";
+
+        String result = FileContentLoader.decodeFileContent(encoding, encodedContent);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result, expectedContents);
+    }
+
     private BufferedReader getClasspathReader(Path filePath) {
         return new BufferedReader(
                 new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filePath.toString()),

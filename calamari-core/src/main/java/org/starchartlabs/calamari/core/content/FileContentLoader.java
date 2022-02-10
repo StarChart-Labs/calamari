@@ -58,6 +58,40 @@ public class FileContentLoader {
     private final String mediaType;
 
     /**
+     * Handles decoding the "content" field in JSON responses from the GitHub file contents API
+     * 
+     * @param encoding
+     *            The "encoding" field from the GitHub JSON response
+     * @param content
+     *            The "content" field from the GitHub JSON response
+     * @return The plain text (UTF_8) contents described by the API
+     * @since 1.2.0
+     */
+    public static String decodeFileContent(String encoding, String content) {
+        Objects.requireNonNull(encoding);
+        Objects.requireNonNull(content);
+
+        String result = null;
+
+        Preconditions.checkArgument(Objects.equals(encoding, "base64"),
+                Strings.format(
+                        "GitHub content responses are expected to be of base64 encoding, got %s - check that requested path is a file",
+                        encoding));
+
+        try {
+            // Note: Both UTF-8 and the mime-decoder were determined experimentally
+            // For discussion and write-up, see:
+            // https://stackoverflow.com/questions/40768678/decoding-base64-while-using-github-api-to-download-a-file/54302528#54302528
+            result = new String(
+                    Base64.getMimeDecoder().decode(content.getBytes(StandardCharsets.UTF_8)));
+        } catch (IllegalArgumentException e) {
+            throw new FileContentException("Error deserializing base64 from GitHub response", e);
+        }
+
+        return result;
+    }
+
+    /**
      * @param userAgent
      *            The user agent to make web requests as, as
      *            <a href="https://developer.github.com/v3/#user-agent-required">required by GitHub</a>
@@ -170,27 +204,9 @@ public class FileContentLoader {
     private String deserializeResponse(String responseBody) {
         Objects.requireNonNull(responseBody);
 
-        String result = null;
         ContentResponse content = ContentResponse.fromJson(responseBody);
 
-        Preconditions.checkArgument(Objects.equals(content.getEncoding(), "base64"),
-                Strings.format(
-                        "GitHub content responses are expected to be of base64 encoding, got %s - check that requested path is a file",
-                        content.getEncoding()));
-
-        try {
-            // Note: Both UTF-8 and the mime-decoder were determined experimentally
-            // For discussion and write-up, see:
-            // https://stackoverflow.com/questions/40768678/decoding-base64-while-using-github-api-to-download-a-file/54302528#54302528
-            result = new String(
-                    Base64.getMimeDecoder().decode(content.getContent().getBytes(StandardCharsets.UTF_8)));
-        } catch (IllegalArgumentException e) {
-            logger.error("Error deserializing base64 from response: {}", responseBody, e);
-
-            throw new FileContentException("Error deserializing base64 from GitHub response", e);
-        }
-
-        return result;
+        return decodeFileContent(content.getEncoding(), content.getContent());
     }
 
     /**

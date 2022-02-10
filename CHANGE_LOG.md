@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Exposed base64 file content decoding algorithm in FileContentReader as a static method for client use
 
 ## [1.1.0]
 ### Added
