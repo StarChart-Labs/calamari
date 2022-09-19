@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Updated com.google.code.gson:gson from 2.8.9 to 2.9.1
+- Updated com.squareup.okhttp3:mockwebserver from 4.9.3 to 4.10.0
+- Updated com.squareup.okhttp3:okhttp from 4.9.3 to 4.10.0
+- Updated io.jsonwebtoken:jjwt-api from 0.11.2 to 0.11.5
+- Updated io.jsonwebtoken:jjwt-gson from 0.11.2 to 0.11.5
+- Updated io.jsonwebtoken:jjwt-impl from 0.11.2 to 0.11.5
+- Updated org.starchartlabs.alloy:alloy-core from 1.0.2 to 1.0.3
+- Updated org.mockito:mockito-core from 4.1.0 to 4.8.0
+- Updated org.slf4j:slf4j-api from 1.7.32 to 1.7.36
+- Updated org.slf4j:slf4j-simple from 1.7.32 to 1.7.36
+- Updated org.testng:testng from 7.4.0 to 7.5
 
 ## [1.2.0]
 ### Added
