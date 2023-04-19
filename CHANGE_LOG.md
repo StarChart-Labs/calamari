@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Ability to read token without header formatting from InstallationAccessToken, for use cases such as authentication during native Git calls
 
 ## [1.2.1]
 ### Changed
