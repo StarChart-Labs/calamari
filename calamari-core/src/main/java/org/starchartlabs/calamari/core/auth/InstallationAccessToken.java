@@ -63,6 +63,8 @@ public class InstallationAccessToken implements Supplier<String> {
 
     private final OkHttpClient httpClient;
 
+    private final Supplier<String> tokenSupplier;
+
     private final Supplier<String> headerSupplier;
 
     private final int cacheExpirationMinutes;
@@ -125,9 +127,9 @@ public class InstallationAccessToken implements Supplier<String> {
 
         httpClient = new OkHttpClient();
         this.cacheExpirationMinutes = cacheExpirationMinutes;
-        headerSupplier = Suppliers.map(
-                Suppliers.memoizeWithExpiration(this::generateNewToken, this.cacheExpirationMinutes, TimeUnit.MINUTES),
-                InstallationAccessToken::toAuthorizationHeader);
+        tokenSupplier = Suppliers.memoizeWithExpiration(this::generateNewToken, this.cacheExpirationMinutes,
+                TimeUnit.MINUTES);
+        headerSupplier = Suppliers.map(tokenSupplier, InstallationAccessToken::toAuthorizationHeader);
     }
 
     /**
@@ -138,7 +140,30 @@ public class InstallationAccessToken implements Supplier<String> {
      */
     @Override
     public String get() {
+        return getHeader();
+    }
+
+    /**
+     * 
+     * @return Authorization header value to authenticate as a GitHub App installation
+     * @throws KeyLoadingException
+     *             If the is an error making the GitHub web request to obtain the access token
+     * @since 1.2.2
+     */
+    public String getHeader() {
         return headerSupplier.get();
+    }
+
+    /**
+     * @return Token used to authenticate as a GitHub App installation. It is recommended to use {@link #getHeader()}
+     *         instead in most cases, which provides the fully formatted header values for API requests. The token
+     *         itself should only be needed for operations such as native Git calls
+     * @throws KeyLoadingException
+     *             If the is an error making the GitHub web request to obtain the access token
+     * @since 1.2.2
+     */
+    public String getToken() {
+        return tokenSupplier.get();
     }
 
     /**

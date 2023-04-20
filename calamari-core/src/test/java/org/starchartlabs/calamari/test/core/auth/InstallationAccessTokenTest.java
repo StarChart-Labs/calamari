@@ -281,6 +281,146 @@ public class InstallationAccessTokenTest {
     }
 
     @Test
+    public void getHeader() throws Exception {
+        MockResponse response = new MockResponse()
+                .addHeader("Content-Type", "application/json")
+                .setBody(accessTokenResponse);
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(response);
+            server.start();
+
+            String installationAccessTokenUrl = server.url("/install").toString();
+
+            InstallationAccessToken token = new InstallationAccessToken(installationAccessTokenUrl, applicationKey,
+                    "userAgent");
+
+            try {
+                String result = token.getHeader();
+
+                Assert.assertNotNull(result);
+                Assert.assertEquals(result, "token " + accessToken);
+            } finally {
+                Assert.assertEquals(server.getRequestCount(), 1);
+                RecordedRequest request = server.takeRequest(1, TimeUnit.SECONDS);
+
+                Assert.assertNotNull(request.getHeader("Authorization"));
+                Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
+                Assert.assertEquals(request.getHeader("Accept"), MediaTypes.APP_PREVIEW);
+                Assert.assertEquals(request.getPath(), "/install");
+            }
+        }
+    }
+
+    @Test
+    public void getHeaderCached() throws Exception {
+        MockResponse response = new MockResponse()
+                .addHeader("Content-Type", "application/json")
+                .setBody(accessTokenResponse);
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(response);
+            server.start();
+
+            String installationAccessTokenUrl = server.url("/install").toString();
+
+            InstallationAccessToken token = new InstallationAccessToken(installationAccessTokenUrl, applicationKey,
+                    "userAgent");
+
+            try {
+                String result = token.getHeader();
+
+                Assert.assertNotNull(result);
+                Assert.assertEquals(result, "token " + accessToken);
+
+                // Default caching is 59-60 minutes - this should not result in any further web calls
+                for (int i = 0; i < 10; i++) {
+                    token.getHeader();
+                }
+            } finally {
+                // Caching results in a single web call
+                Assert.assertEquals(server.getRequestCount(), 1);
+                RecordedRequest request = server.takeRequest(1, TimeUnit.SECONDS);
+
+                Assert.assertNotNull(request.getHeader("Authorization"));
+                Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
+                Assert.assertEquals(request.getHeader("Accept"), MediaTypes.APP_PREVIEW);
+                Assert.assertEquals(request.getPath(), "/install");
+            }
+        }
+    }
+
+    @Test
+    public void getToken() throws Exception {
+        MockResponse response = new MockResponse()
+                .addHeader("Content-Type", "application/json")
+                .setBody(accessTokenResponse);
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(response);
+            server.start();
+
+            String installationAccessTokenUrl = server.url("/install").toString();
+
+            InstallationAccessToken token = new InstallationAccessToken(installationAccessTokenUrl, applicationKey,
+                    "userAgent");
+
+            try {
+                String result = token.getToken();
+
+                Assert.assertNotNull(result);
+                Assert.assertEquals(result, accessToken);
+            } finally {
+                Assert.assertEquals(server.getRequestCount(), 1);
+                RecordedRequest request = server.takeRequest(1, TimeUnit.SECONDS);
+
+                Assert.assertNotNull(request.getHeader("Authorization"));
+                Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
+                Assert.assertEquals(request.getHeader("Accept"), MediaTypes.APP_PREVIEW);
+                Assert.assertEquals(request.getPath(), "/install");
+            }
+        }
+    }
+
+    @Test
+    public void getTokenCached() throws Exception {
+        MockResponse response = new MockResponse()
+                .addHeader("Content-Type", "application/json")
+                .setBody(accessTokenResponse);
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(response);
+            server.start();
+
+            String installationAccessTokenUrl = server.url("/install").toString();
+
+            InstallationAccessToken token = new InstallationAccessToken(installationAccessTokenUrl, applicationKey,
+                    "userAgent");
+
+            try {
+                String result = token.getToken();
+
+                Assert.assertNotNull(result);
+                Assert.assertEquals(result, accessToken);
+
+                // Default caching is 59-60 minutes - this should not result in any further web calls
+                for (int i = 0; i < 10; i++) {
+                    token.getToken();
+                }
+            } finally {
+                // Caching results in a single web call
+                Assert.assertEquals(server.getRequestCount(), 1);
+                RecordedRequest request = server.takeRequest(1, TimeUnit.SECONDS);
+
+                Assert.assertNotNull(request.getHeader("Authorization"));
+                Assert.assertEquals(request.getHeader("User-Agent"), "userAgent");
+                Assert.assertEquals(request.getHeader("Accept"), MediaTypes.APP_PREVIEW);
+                Assert.assertEquals(request.getPath(), "/install");
+            }
+        }
+    }
+
+    @Test
     public void getCustomMediaType() throws Exception {
         MockResponse response = new MockResponse()
                 .addHeader("Content-Type", "application/json")
@@ -345,7 +485,6 @@ public class InstallationAccessTokenTest {
 
             server.enqueue(respositoryResponse);
             server.enqueue(accessResponse);
-
 
             InstallationAccessToken token = InstallationAccessToken.forRepository(repoUrl, applicationKey,
                     "userAgent");
