@@ -1,3 +1,4 @@
 rootProject.name = 'calamari'
 
 include 'calamari-core'
+include 'gradle-platform'
